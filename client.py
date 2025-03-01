@@ -38,13 +38,19 @@ input_text = st.text_input(f"Enter the text you want to translate to {selected_l
 
 # Function to process input text and get translation
 def get_translation(input_text):
-    # Prepare the input text for the chain, directly as a dict with the necessary keys
-    result = chain.invoke({"text": input_text})  # Ensure the input matches the prompt
-    print(f"Chain result: {result}")  # Debugging line to print the result
-    if result:
-        return result.get('output', "Translation failed.")  # Safely access the 'output' key
-    else:
-        return "Error: Unable to get a valid response from the model."
+    try:
+        # Prepare the input text for the chain, directly as a dict with the necessary keys
+        result = chain.invoke({"text": input_text})  # Ensure the input matches the prompt
+        st.write(f"Chain result: {result}")  # Debugging line to print the result
+        
+        if result:
+            # Return the output from the chain or fallback message if no output
+            return result.get('output', "Translation failed.")
+        else:
+            return "Error: No valid result returned from the model."
+    except Exception as e:
+        st.write(f"Error encountered: {e}")  # Display the error message
+        return "Error processing the translation."
 
 # Trigger translation when input is provided
 if input_text:
