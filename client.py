@@ -14,7 +14,7 @@ languages = ["French", "Spanish", "German", "Italian"]
 selected_language = st.selectbox("Select Language", languages)
 
 # LLM Models
-llm_models = ["mixtral-8x7b-32768", "Gemma2-9b-It", "another-model"]
+llm_models = ["mixtral-8x7b-32768", "Gemma2-9b-It"]
 selected_model = st.selectbox("Select LLM Model", llm_models)
 
 # Initialize the model with the selected LLM model and API key
