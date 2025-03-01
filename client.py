@@ -11,6 +11,8 @@ load_dotenv()
 
 # Get API key from environment
 groq_api_key = os.getenv("GROQ_API_KEY")
+st.write(f"Groq API Key: {groq_api_key}")
+
 
 # Initialize model
 model = ChatGroq(model="Gemma2-9b-It", groq_api_key=groq_api_key)
