@@ -1,44 +1,49 @@
-import os
-import requests
 import streamlit as st
+from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from langchain_groq import ChatGroq
-from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
+# Directly input your API key here
+groq_api_key = "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"  # Replace with your actual Groq API key
 
-# Get API key from environment
-groq_api_key = os.getenv("GROQ_API_KEY")
-st.write(f"Groq API Key: {groq_api_key}")
+# Initialize the model with the provided API key
+model = ChatGroq(model="mixtral-8x7b-32768", groq_api_key=groq_api_key)
 
-
-# Initialize model
-model = ChatGroq(model="Gemma2-9b-It", groq_api_key=groq_api_key)
-
-# Create prompt template
-system_template = "Translate the following into {language}:"
+# Define the prompt template for translation
+system_template = "Translate the following into French:"
 prompt_template = ChatPromptTemplate.from_messages([
     ('system', system_template),
     ('user', '{text}')
 ])
 
-# Output parser
+# Initialize the output parser
 parser = StrOutputParser()
 
-# Create the translation chain
+# Create the chain (model -> prompt -> parser)
 chain = prompt_template | model | parser
 
-# Streamlit app
-st.title("LLM Application Using LCEL")
+# Streamlit UI
+st.title("LLM Translation App")
 input_text = st.text_input("Enter the text you want to translate to French")
 
+# Function to process input text and get translation
+def get_translation(input_text):
+    # Create a json_body that fits the model's input
+    json_body = {
+        "input": {
+            "language": "French",
+            "text": input_text
+        }
+    }
+
+    # Run the chain to get the translation result
+    result = chain.invoke({"input": json_body})
+
+    # Return the translated text
+    return result['output']
+
+# Trigger translation when input is provided
 if input_text:
-    try:
-        # Run the translation directly in the chain
-        translated_text = chain.invoke({"language": "French", "text": input_text})
-        st.subheader("Translated Text:")
-        st.write(translated_text)
-    except Exception as e:
-        st.error(f"Error: {str(e)}")
+    translated_text = get_translation(input_text)
+    st.subheader("Translated Text:")
+    st.write(translated_text)
