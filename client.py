@@ -4,9 +4,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
 # Directly input your API key here
-
 groq_api_key = "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"  # Replace with your actual Groq API key
-
 
 # Streamlit UI
 st.title("LLM Translation App")
@@ -42,14 +40,14 @@ input_text = st.text_input(f"Enter the text you want to translate to {selected_l
 def get_translation(input_text):
     # Prepare the input text for the chain, directly as a dict with the necessary keys
     result = chain.invoke({"text": input_text})  # Ensure the input matches the prompt
-    return result['output']  # Return the output from the chain
+    print(f"Chain result: {result}")  # Debugging line to print the result
+    if result:
+        return result.get('output', "Translation failed.")  # Safely access the 'output' key
+    else:
+        return "Error: Unable to get a valid response from the model."
 
 # Trigger translation when input is provided
 if input_text:
     translated_text = get_translation(input_text)
     st.subheader(f"Translated Text ({selected_language}):")
     st.write(translated_text)
-
-
-
-
