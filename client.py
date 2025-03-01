@@ -1,27 +1,42 @@
+import os
 import requests
 import streamlit as st
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_groq import ChatGroq
+from dotenv import load_dotenv
 
-def get_groq_response(input_text):
-    json_body = {
-        "input": {
-            "language": "French",
-            "text": input_text
-        }
-    }
+# Load environment variables
+load_dotenv()
 
-    response = requests.post("http://127.0.0.1:5000/chain/invoke", json=json_body)
+# Get API key from environment
+groq_api_key = os.getenv("GROQ_API_KEY")
 
-    if response.status_code == 200:
-        data = response.json()
-        return data.get("output", "No translation found.")  # Extract only 'output' field
-    else:
-        return "Error: Unable to process the request."
+# Initialize model
+model = ChatGroq(model="Gemma2-9b-It", groq_api_key=groq_api_key)
+
+# Create prompt template
+system_template = "Translate the following into {language}:"
+prompt_template = ChatPromptTemplate.from_messages([
+    ('system', system_template),
+    ('user', '{text}')
+])
+
+# Output parser
+parser = StrOutputParser()
+
+# Create the translation chain
+chain = prompt_template | model | parser
 
 # Streamlit app
 st.title("LLM Application Using LCEL")
 input_text = st.text_input("Enter the text you want to translate to French")
 
 if input_text:
-    translated_text = get_groq_response(input_text)
-    st.subheader("Translated Text:")
-    st.write(translated_text)  # Display the translated text only
+    try:
+        # Run the translation directly in the chain
+        translated_text = chain.invoke({"language": "French", "text": input_text})
+        st.subheader("Translated Text:")
+        st.write(translated_text)
+    except Exception as e:
+        st.error(f"Error: {str(e)}")
